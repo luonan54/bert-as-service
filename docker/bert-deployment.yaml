@@ -21,12 +21,12 @@ spec:
 #
 #       #
 #       #
-        image: "gcr.io/jsp-work/bert-as-service"
+        image: "gcr.io/jsp-bert/bert-as-service"
 #       #
 #       #
         resources:
             limits:
-             nvidia.com/gpu: 4
+             nvidia.com/gpu: 2
         readinessProbe:
           httpGet:
             path: /status/client
