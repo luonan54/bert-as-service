@@ -1,0 +1,12 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: bert-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: bert-ip
+spec:
+  backend:
+    serviceName: bert-as-service
+    servicePort: 8125
+    
+   

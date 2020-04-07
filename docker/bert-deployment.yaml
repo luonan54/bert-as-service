@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bert-deployment
+spec:
+  selector:
+    matchLabels:
+      app: Bert
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: Bert
+    spec:
+      containers:
+      - name: bert-container
+#
+# you can replace this image with the container you built and stored in gcr.io
+# as seen in setup.sh.  make sure its indented properly, lined up to the #
+# above and below :-)
+#
+#       #
+#       #
+        image: "gcr.io/jsp-work/bert-as-service"
+#       #
+#       #
+        resources:
+            limits:
+             nvidia.com/gpu: 4
+        readinessProbe:
+          httpGet:
+            path: /status/client
+            port: 8125
+          timeoutSeconds: 2
+        ports:
+        - containerPort: 8125
