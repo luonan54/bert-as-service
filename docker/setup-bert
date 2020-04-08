@@ -1,5 +1,26 @@
 #!/bin/bash
-
+#
+# setup-bert
+# Install Bert as a Service on Google Kubernetes Engine (GKE)
+#
+#
+# Prerequisites
+#
+# 1. Install GCloud, gsutil
+# https://cloud.google.com/sdk/install
+# https://cloud.google.com/storage/docs/gsutil_install
+#
+# 2. Install Kubectl
+# https://kubernetes.io/docs/tasks/tools/install-kubectl/
+#
+# 3. Install Docker 
+# https://docs.docker.com/install/
+#
+# 4. Create a new project and enable billing,
+#    settting GCP_PROJECT below.
+# https://console.cloud.google.com/cloud-resource-manager
+#
+#
 FILE=./docker/Dockerfile
 if [ ! -f "$FILE" ]; then
    echo "Run this script from the top level directory of Bert As Service."
@@ -18,23 +39,6 @@ case "$choice" in
   n|N ) exit;;
   * ) exit;;
 esac
-
-#
-# Prerequisites
-#
-# 1. Install GCloud, gsutil
-# https://cloud.google.com/sdk/install
-# https://cloud.google.com/storage/docs/gsutil_install
-#
-# 2. Install Kubectl
-# https://kubernetes.io/docs/tasks/tools/install-kubectl/
-#
-# 3. Install Docker 
-# https://docs.docker.com/install/
-#
-# 4. Create a new project and enable billing,
-#    settting GCP_PROJECT below.
-# https://console.cloud.google.com/cloud-resource-manager
 
 # Name of your GCP project for billing, etc.
 export GCP_PROJECT=`gcloud config get-value project`
@@ -94,20 +98,23 @@ gcloud services enable monitoring.googleapis.com --async
 # https://console.cloud.google.com/iam-admin/quotas
 #
 export GCP_GPU=nvidia-tesla-k80
-export GCP_GPU_COUNT=2
-export GCP_GPU_POOL=bert_gpu_pool
+export GCP_GPU_COUNT=4
+export GCP_GPU_POOL=bert-gpu-pool
 
 # create a cluster to use these GPUs
 echo "Creating base cluster"
-gcloud container clusters create $GCP_CLUSTER --num-nodes 1
+gcloud container clusters create $GCP_CLUSTER \
+       --enable-autoscaling --max-nodes=4 --min-nodes=1 \
+       --num-nodes 1 --zone $GCP_ZONE 
 
 # create a pool of nodes for the cluster
 echo "Creating a pool of beefy GPU nodes"
 gcloud container node-pools create $GCP_GPU_POOL \
---accelerator=type=$GCP_GPU,count=$GCP_GPU_COUNT --zone $GCP_ZONE \
---machine-type n1-highmem-8 --disk-type=pd-ssd  -disk-size=256G \
---enable-autoscaling --max-nodes=2 --min-nodes=0 \
---cluster=$GCP_CLUSTER \
+--cluster=$GCP_CLUSTER --zone=$GCP_ZONE \
+--machine-type n1-highmem-8 --disk-type=pd-ssd  --disk-size=256G \
+--accelerator=type=$GCP_GPU,count=$GCP_GPU_COUNT \
+--num-nodes=1 \
+--enable-autoscaling --max-nodes=2 --min-nodes=0  
 
 # hook up kubectl to our cluster
 echo "Enabling kubernetes access"
