@@ -6,6 +6,19 @@ if [ ! -f "$FILE" ]; then
    exit 1
 fi
 
+echo "Welcome to Bert as a Service on GKE!"
+echo " "
+echo "This script assumes you've already created a GCP project"
+echo "and have pointed gcloud to it.  We'll take it from there."
+echo "You'll also need to have installed kubectl and docker."
+echo " "
+read -p "Ready to proceed (y/n)? " choice
+case "$choice" in 
+  y|Y ) echo "Installing Bert";;
+  n|N ) exit;;
+  * ) exit;;
+esac
+
 #
 # Prerequisites
 #
@@ -24,7 +37,7 @@ fi
 # https://console.cloud.google.com/cloud-resource-manager
 
 # Name of your GCP project for billing, etc.
-export GCP_PROJECT=jsp-bert
+export GCP_PROJECT=`gcloud config get-value project`
 export GCP_ZONE=us-east1-c
 export GCP_CLUSTER=bert-cluster
 
@@ -85,17 +98,16 @@ export GCP_GPU_COUNT=2
 export GCP_GPU_POOL=bert_gpu_pool
 
 # create a cluster to use these GPUs
-echo "Creating a GPU node pool"
-gcloud container clusters create $GCP_CLUSTER \
---accelerator=type=$GCP_GPU,count=$GCP_GPU_COUNT \
---zone $GCP_ZONE
+echo "Creating base cluster"
+gcloud container clusters create $GCP_CLUSTER --num-nodes 1
 
 # create a pool of nodes for the cluster
-echo "Creating a GPU cluster"
+echo "Creating a pool of beefy GPU nodes"
 gcloud container node-pools create $GCP_GPU_POOL \
 --accelerator=type=$GCP_GPU,count=$GCP_GPU_COUNT --zone $GCP_ZONE \
+--machine-type n1-highmem-8 --disk-type=pd-ssd  -disk-size=256G \
+--enable-autoscaling --max-nodes=2 --min-nodes=0 \
 --cluster=$GCP_CLUSTER \
---enable-autoscaling --max-nodes=3 --min-nodes=0
 
 # hook up kubectl to our cluster
 echo "Enabling kubernetes access"
@@ -115,7 +127,13 @@ docker push gcr.io/$GCP_PROJECT/bert-as-service
 # Reserve a global IP address for our bert service
 echo "Getting an IP address"
 gcloud compute addresses create bert-ip --global
-export $GCP_BERT_IP=`gcloud compute addresses list | grep bert-ip | awk '{print $2}'`
+export GCP_BERT_IP=`gcloud compute addresses list | grep bert-ip | awk '{print $2}'`
+
+# Update our deployment with proper container info
+echo "Customizing GKE"
+cp docker/bert-deployment.tpl docker/bert-deployment.yaml
+sed -i -e "s/CONTAINER_IMAGE/gcr\.io\/$GCP_PROJECT\/bert-as-service/g" docker/bert-deployment.yaml
+sed -i -e "s/GPU_COUNT/$GCP_GPU_COUNT/g" docker/bert-deployment.yaml
 
 # Stand up service
 echo "Standing up Bert as a service"
@@ -123,4 +141,12 @@ kubectl apply -f docker/bert-deployment.yaml
 kubectl apply -f docker/bert-as-service.yaml
 kubectl apply -f docker/bert-ingress.yaml
 
-echo "Bert is now live at $GCP_BERT_IP\n"
+echo "Bert will soon be live at $GCP_BERT_IP which you can test with docker/test-bert"
+echo " "
+echo "Google will need a few minutes now to setup HTTP access in its"
+echo "internal routing tables.  You can track the status on the Google Cloud Console"
+echo "at https://console.cloud.google.com and then visiting Google Kubernetes Engine"
+echo "to track the cluster's Ingress status."
+echo " "
+echo "Happy Hacking!"
+

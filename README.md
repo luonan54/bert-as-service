@@ -126,8 +126,8 @@ NUM_WORKER=1
 PATH_MODEL=/PATH_TO/_YOUR_MODEL/
 docker run --runtime nvidia -dit -p 5555:5555 -p 5556:5556 -v $PATH_MODEL:/model -t bert-as-service $NUM_WORKER
 ```
-<p>If you're a customer of Google Cloud, you can also setup and deploy Bert
-as a Service on Google Kubernetes Engine (GKE).  You'll first need to create a 
+<p>Google Cloud custmoers can deploy Bert
+as a Service on Google Kubernetes Engine (GKE) with a few handy scripts.  You'll first need to create a 
 <a href="https://console.cloud.google.com/cloud-resource-manager"GCP project</a> 
 and have installed the relevant command-line tools of
 <a href="https://cloud.google.com/sdk/install">gcloud</a>, 
