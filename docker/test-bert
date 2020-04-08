@@ -1,0 +1,11 @@
+#!/bin/bash
+
+echo "Getting an IP address"
+export GCP_BERT_IP=`gcloud compute addresses list | grep bert-ip | awk '{print $2}'`
+
+# Test service
+
+echo "Testing service at $GCP_BERT_IP"
+curl -X POST http://$GCP_BERT_IP/encode \
+ -H 'content-type: application/json' \
+ -d '{"id": 123,"texts": ["hello world"], "is_tokenized": false}'

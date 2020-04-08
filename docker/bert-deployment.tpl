@@ -14,10 +14,10 @@ spec:
     spec:
       containers:
       - name: bert-container
-        image: gcr.io/jsp-bert/bert-as-service
+        image: CONTAINER_IMAGE
         resources:
             limits:
-             nvidia.com/gpu: 4
+             nvidia.com/gpu: GPU_COUNT
         readinessProbe:
           httpGet:
             path: /status/client

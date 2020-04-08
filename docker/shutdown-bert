@@ -1,0 +1,22 @@
+#!/bin/bash
+
+export GCP_ZONE=us-east1-c
+
+echo "Warning:  This will delete the bert service and its cluster."
+read -p "Ok to proceed (y/n)? " choice
+case "$choice" in 
+  y|Y ) echo "Shutting down Bert";;
+  n|N ) exit;;
+  * ) exit;;
+esac
+
+echo "Removing deployment"
+kubectl delete deployments bert-deployment
+echo "Delete service"
+kubectl delete services bert-as-service
+echo "Removing external connection"
+kubectl delete ingress bert-ingress
+echo "Removing cluster"
+gcloud container clusters delete bert-cluster --zone=$GCP_ZONE
+
+echo "Bert has now been shut down."

@@ -82,7 +82,7 @@ gcloud services enable monitoring.googleapis.com --async
 #
 export GCP_GPU=nvidia-tesla-k80
 export GCP_GPU_COUNT=2
-export GCP_GPU_POOL=bert-gpu-pool
+export GCP_GPU_POOL=bert_gpu_pool
 
 # create a cluster to use these GPUs
 echo "Creating a GPU node pool"
@@ -115,7 +115,7 @@ docker push gcr.io/$GCP_PROJECT/bert-as-service
 # Reserve a global IP address for our bert service
 echo "Getting an IP address"
 gcloud compute addresses create bert-ip --global
-export GCP_BERT_IP=`gcloud compute addresses list | grep bert-ip | awk '{print $2}'`
+export $GCP_BERT_IP=`gcloud compute addresses list | grep bert-ip | awk '{print $2}'`
 
 # Stand up service
 echo "Standing up Bert as a service"
@@ -123,10 +123,4 @@ kubectl apply -f docker/bert-deployment.yaml
 kubectl apply -f docker/bert-as-service.yaml
 kubectl apply -f docker/bert-ingress.yaml
 
-# Test service
-#
-# curl -X POST http://$GCP_BERT_IP/encode \
-#  -H 'content-type: application/json' \
-#  -d '{"id": 123,"texts": ["hello world"], "is_tokenized": false}'
-
-echo "Bert will be live at $GCP_BERT_IP"
+echo "Bert is now live at $GCP_BERT_IP\n"
