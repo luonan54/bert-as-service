@@ -139,8 +139,9 @@ export GCP_BERT_IP=`gcloud compute addresses list | grep bert-ip | awk '{print $
 # Update our deployment with proper container info
 echo "Customizing GKE"
 cp docker/bert-deployment.tpl docker/bert-deployment.yaml
-sed -i -e "s/CONTAINER_IMAGE/gcr\.io\/$GCP_PROJECT\/bert-as-service/g" docker/bert-deployment.yaml
-sed -i -e "s/GPU_COUNT/$GCP_GPU_COUNT/g" docker/bert-deployment.yaml
+sed -i .bak "s/CONTAINER_IMAGE/gcr\.io\/$GCP_PROJECT\/bert-as-service/g" docker/bert-deployment.yaml
+sed -i .bak "s/GPU_COUNT/$GCP_GPU_COUNT/g" docker/bert-deployment.yaml
+rm docker/bert-deployment.yaml.bak
 
 # Stand up service
 echo "Standing up Bert as a service"

@@ -129,24 +129,24 @@ docker run --runtime nvidia -dit -p 5555:5555 -p 5556:5556 -v $PATH_MODEL:/model
 <p>We've included scripts for Google Cloud customers to deploy Bert
 on Google Kubernetes Engine (GKE).  You'll first need to create a 
 <a href="https://console.cloud.google.com/cloud-resource-manager">GCP project</a> 
-and instal the relevant command-line tools of
+and install the relevant command-line tools of
 <a href="https://cloud.google.com/sdk/install">gcloud</a>, 
 <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">kubectl</a>, and 
-<a href="https://docs.docker.com/install/">docker</a>. Then from the top level
-directory of this repo, type:</p>
+<a href="https://docs.docker.com/install/">docker</a>. Then,
 
 ```bash
 ./docker/setup-bert
 ```
 This will establish a permanent IP address and run Bert as a web service
-on port 80. The script will end by sharing the IP address. 
-Test it by sending Hello World.
+on port 80 within your GCP project. The script will end by sharing the IP address,
+which usually takes about 5 minutes to establish. Test it by sending Hello World.
 
 ```bash
+pip install requests
 ./docker/test-bert
 ```
 
-Once you're done, you can shutdown Bert and all its cluster resources with
+Once you're done, you can shutdown Bert and delete its cluster resources with
 
 ```bash
 ./docker/shutdown-bert
