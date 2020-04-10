@@ -16,7 +16,9 @@ print("Detecting bert endpoint")
 cmd = "gcloud compute addresses list | grep bert-ip | awk '{print $2}'"
 BERT_HTTP = 'http://'+os.popen(cmd).read().split()[0]+'/encode'
 BERT_TENSOR_SIZE = 768
-BERT_TENSOR_DISTANCE = "angular"
+
+# other options are dot, hamming, angular.  dot seems best anecdotally.
+BERT_TENSOR_DISTANCE = "dot"
 BERT_TENSOR_DB = "bert.db"
 
 # create our Annoy index
@@ -70,7 +72,7 @@ def sentences(text):
   text = clean_text(text)
   return sent_tokenize(text)
 
-def first_clean_sentences(text, k=3):
+def first_clean_sentences(text, k=10):
   sent = sentences(text)
   valid = []
   # k clean sentences
