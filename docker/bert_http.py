@@ -13,8 +13,13 @@ from nltk.tokenize import sent_tokenize
 
 # load our Bert endpoint
 print("Detecting bert endpoint")
-cmd = "gcloud compute addresses list | grep bert-ip | awk '{print $2}'"
-BERT_HTTP = 'http://'+os.popen(cmd).read().split()[0]+'/encode'
+
+#uncomment to use your own, or enjoy mine.
+#
+#cmd = "gcloud compute addresses list | grep bert-ip | awk '{print $2}'"
+#BERT_HTTP = 'http://'+os.popen(cmd).read().split()[0]+'/encode'
+#
+BERT_HTTP = 'http://bert.scott.ai/encode'
 BERT_TENSOR_SIZE = 768
 
 # other options are dot, hamming, angular.  dot seems best anecdotally.
